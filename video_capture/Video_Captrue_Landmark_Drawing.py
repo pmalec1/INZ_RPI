@@ -8,19 +8,33 @@ mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 
 
-#Inicjalizacja kamery
-picam2 = Picamera2()
-#Konfiguracja kamery
-picam2.preview_configuration.main.size = (640, 480)
-picam2.preview_configuration.main.format = "RGB888"
-#Uruchomienie kamery
-picam2.start()
+
+
+def initialize_camera():
+    picam2 = Picamera2()
+    picam2.preview_configuration.main.size = (640, 480)
+    picam2.preview_configuration.main.format = "RGB888"
+    picam2.start()
+    return picam2
+
+def kill_camera_processes(picam2):
+    picam2.stop()
+    cv2.destroyAllWindows()
+
+def capture_camera_frame(picam2):
+    return picam2.capture_array()
+
+    
+
+
+
+
+picam2 = initialize_camera()
 
 try:
     with mp_hands.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1) as hands:
         while True:
-            frame = picam2.capture_array()
-            
+            frame = capture_camera_frame(picam2)          
             image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = hands.process(image_rgb)
             if results.multi_hand_landmarks != None:
@@ -30,6 +44,5 @@ try:
             if cv2.waitKey(1) & 0xFF==ord('q'):
                 break
 finally:
-            picam2.stop()
-            cv2.destroyAllWindows()
+            kill_camera_processes(picam2)
 

@@ -17,17 +17,23 @@ csv_file = None  # Zmienna do przechowywania uchwytu pliku
 # Inicjalizacja kamery
 picam2 = camera_utils.initialize_camera()
 try:
+    #Otwarcie pliku do zapisu landmarków
     csv_file = open(csv_filename, "a")
+    
     while (UI_utils.check_if_specific_key_pressed_cv2('q',1)==False):
-        
+        #Pobierz ramke    
         cam_frame = camera_utils.capture_camera_frame(picam2)
+        #Przetwórz ramke
         processing_results=detection_utils.detecting_hand_lndmrks(hands,cam_frame)        
-        
+        #Sprawdz czy wykryto dlon 
         if detection_utils.check_if_hand_is_detected(processing_results):
-            
+            #Pobranie wspolrzednych landmarkow
             landmark_coords = landmarks_processing.process_one_hand_landmarks_coords(processing_results.multi_hand_landmarks,640, 480)
+            #ROI -> skrajne wspolrzedne dloni
             roi=landmarks_processing.calculate_roi(landmark_coords)
+            #Znormalizuj
             normalized_lndms_coords=landmarks_processing.normalize_landmarks(landmark_coords,roi)
+            #Narysuj 
             draw_landmarks_utils.draw_landmarks(cam_frame,landmark_coords,mp_hands.HAND_CONNECTIONS)
 
             if UI_utils.check_if_specific_key_pressed_cv2('s',1)==True:
